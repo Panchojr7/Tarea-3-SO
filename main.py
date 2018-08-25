@@ -3,10 +3,9 @@
 ######## 201573546-8 #######
 ############################
 
-import threading
 from time import sleep
 import time
-
+import threading
 
 '''Semaforos by fases'''
 
@@ -23,10 +22,13 @@ wash = threading.Semaphore(5)
 fase3 = threading.Semaphore(1)
 dry = threading.Semaphore(2)
 
+alumnos = open ("clientes.txt", "a")
+personal = open ("personal.txt", "a")
 
 def escribir(id1,id2,ctrl):
-	alumnos = open ("clientes.txt", "a")
-	personal = open ("personal.txt", "a")
+	global alumnos
+	global personal
+
 	student = str(id1)
 	thing = str(id2)
 	if ctrl == 1:
@@ -56,136 +58,167 @@ def escribir(id1,id2,ctrl):
 
 '''Variables'''
 
-alum=0 #cantidad de alumnos, max 25
-ph=[10,10,10,10,10,10,10,10,10,10]
-cubiculos=[0,1,2,3,4,5,6,7,8,9]
-lavabos=[0,1,2,3,4] 
-secador=[0,1] #Cantidad de secador de manos
-n=0 #Controlador de clientes
+ps = 0 #personas
+aeb = 0 #alumnos en el banio
 
 
-#######funciones y hebras########
+'''Estructuras'''
+cubiculos = [0,1,2,3,4,5,6,7,8,9]
+ph = [10,10,10,10,10,10,10,10,10,10] #Papel Higienico por cada cubiculo
+lavabos = [0,1,2,3,4]
+secadores = [0,1] #Cantidad de secadores de manos
+
+
+
+''' Thread alumnos que entran al banio '''
 
 class alumno(threading.Thread):
 	def __init__(self, id):
 		threading.Thread.__init__(self)
-		self.id = id  # Cada self.id corresonde a un alumno
+		self.id = id 
 
 	def run(self):
-		global n
+		global ps
 		wc(self.id)
-		n=n+1
+		ps+=1
+
+''' Funcion de todo lo que acontece en el banio (1313) '''
 
 def wc(usuario):
+
+	'''Variables Globales'''
 	global lavabos
 	global cubiculos
 	global ph
-	global secador
-	global n
+	global secadores
 
 	######## Fase 1 ########
 	fase1.acquire()
 	shit.acquire()
-	key = cubiculos[0]
+	articulo = cubiculos[0]
 	del cubiculos[0]
 	fase1.release()
-	escribir(usuario, key, 1)
+	escribir(usuario, articulo, 1)
 
-	if ph[key]== 0:
-		escribir(usuario, key, 2)
+	if ph[articulo] == 0:
+		escribir(usuario, articulo, 2)
 		cs.acquire()
 		sleep(1)
 		escribir(usuario,0,3)
-		ph[key]=3
+		ph[articulo] = 3
 		cs.release()
 	else:
-		ph[key] -=1
+		ph[articulo] -= 1
 	sleep(5)
-	cubiculos.append(key)
+	cubiculos.append(articulo)
 	shit.release()
-	escribir(usuario, key, 4)
+	escribir(usuario, articulo, 4)
 
 
 	######## Fase 2 ########
 	wash.acquire()
 	fase2.acquire()
-	llave = lavabos[0]
+	articulo = lavabos[0]
 	del lavabos[0]
 	fase2.release()
-	escribir(usuario, llave, 5)
+	escribir(usuario, articulo, 5)
 	sleep(5)
-	lavabos.append(llave)
+	lavabos.append(articulo)
 	wash.release()
-	escribir(usuario, llave, 6)
+	escribir(usuario, articulo, 6)
 
 
 	######## Fase 3 ########
 	dry.acquire()
 	fase3.acquire()
-	pos= secador[0]
-	del secador[0]
+	articulo = secadores[0]
+	del secadores[0]
 	fase3.release()
-	escribir(usuario, pos, 7)
-	sleep(2)
-	secador.append(pos)
+	escribir(usuario, articulo, 7)
+	sleep(5)
+	secadores.append(articulo)
 	dry.release()
-	escribir(usuario, pos, 8)
+	escribir(usuario, articulo, 8)
 
 
 
+''' Funcion correspondiente al personal del aseo'''
+''' Usada para llamar a lo anterior '''
 
-###Funcion del thread de la tia del aseo.
-def tia():
-	global n
-	global alum
+def Aseo():
+
+	#Variables Globales#
+	global ps
+	global aeb
+
 	students=[]
-	while alum >25 or alum==0:
-		alum= int(input( "Enter a number of Students: "))
+	while aeb >25 or aeb == 0:
+		aeb= int(input( "Enter a number of Students: "))
 
-	##### Crear lista de clientes####
-	i=0
-	while i<alum:
-		students.append(alumno(i+1))
-		i+=1
-	i=0
-	##activar las hebras de los alumnos##
-	for x in students:
-		p=i+1
-		alumnos= open ("clientes.txt", "a")
-		if x != students[-1]:
-			alumnos.write("Student N° "+str(p)+" arrives the bathroom at "+time.strftime("%H:%M:%S")+"\n")
+	'''Lista de estudiantes '''
+	s=0
+	while s < aeb:
+		students.append(alumno(s+1))
+		s+=1
+	
+
+
+	''' Llegada al banio e inicio del thread '''
+	c=0
+	for persona in students:
+		pers=c+1
+
+		if persona != students[-1]:
+			alumnos= open ("clientes.txt", "a")
+			alumnos.write("Student N° "+str(pers)+" arrives the bathroom at "+time.strftime("%H:%M:%S")+"\n")
 		else:
-			alumnos.write("Student N° "+str(p)+" arrives the bathroom at "+time.strftime("%H:%M:%S")+"\n\n")
+			alumnos= open ("clientes.txt", "a")
+			alumnos.write("Student N° "+str(pers)+" arrives the bathroom at "+time.strftime("%H:%M:%S")+"\n\n")
+
 		alumnos.close()
-		x.start()
-		i+=1
-	while n <alum:
-		n
-	if n== alum:
-		print("-------------------")
-		print("si/no")
-		respuesta= str(input( "¿llegan mas alumnos? "))
-		while  respuesta != "si" and respuesta != "no":
-			respuesta= str(input( "¿llegan mas alumnos? "))
-		if respuesta== "si":
-			n=0
-			alum=0
-			tia()
-		if respuesta=="no":
-			print("FIN DEL PROGRAMA")
+		persona.start()
+		c+=1
+
+	while ps <aeb:
+		ps
+
+	if ps == aeb:
+
+		flag= True
+
+		while flag:
+			print("\n0.- Yes\n1.- No")
+			asw= str(input( "More Students use the bathroom?\n"))
+			if asw == '0' or asw=='1':
+				flag = False
+
+
+		if asw == '0':
+			aeb = 0
+			ps = 0
+			Aseo()
+
+		else:
+			print("Goodbye good man, have a nice day!")
+			sleep(1)
 
 
 
 ####################################### Main #######################################
+
+''' Limpieza de archivos '''
 reset = open("personal.txt", "w")
 reset.close()
 reset= open("clientes.txt", "w")
 reset.close()
 
-tia_aseo=threading.Thread(target=tia)
+''' Sra Juanita reportandose al llamado del deber '''
 personal = open ("personal.txt","a")
-personal.write("Tia del aseo llego a trabajar "+time.strftime("%H:%M:%S")+"\n")
+personal.write("Cleaning Staff starts to work"+time.strftime("%H:%M:%S")+"\n")
 personal.close()
-tia_aseo.start()
+
+''' This part of my life, this little part... is called happiness '''
+aseo=threading.Thread(target=Aseo)
+aseo.start()
 
 
