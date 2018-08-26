@@ -1,8 +1,3 @@
-############################
-#### Francisco Rousseau ####
-######## 201573546-8 #######
-############################
-
 from time import sleep
 import time
 import threading
