@@ -54,6 +54,8 @@ def escribir(id1,id2,ctrl):
 
 	elif ctrl == 8:
 		alumnos.write("## Student N° "+student+" stop using the hand dryer "+thing+" at "+time.strftime("%H:%M:%S")+"\n")
+		alumnos.write("<-- Student N° "+student+" comes out of the bathroom at "+time.strftime("%H:%M:%S")+"\n")
+
 
 
 '''Variables'''
@@ -200,7 +202,6 @@ def Aseo():
 
 		else:
 			print("Goodbye good man, have a nice day!")
-			sleep(1)
 
 
 
@@ -214,7 +215,7 @@ reset.close()
 
 ''' Sra Juanita reportandose al llamado del deber '''
 personal = open ("personal.txt","a")
-personal.write("Cleaning Staff starts to work"+time.strftime("%H:%M:%S")+"\n")
+personal.write("Cleaning Staff starts to work at "+time.strftime("%H:%M:%S")+"\n")
 personal.close()
 
 ''' This part of my life, this little part... is called happiness '''
